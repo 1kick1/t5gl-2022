@@ -1,11 +1,13 @@
 package app;
 
 import java.awt.BorderLayout;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 
 import model.Categoria;
 import model.Producto;
@@ -25,6 +27,7 @@ import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
+import javax.swing.JTable;
 
 public class FrmManteProd extends JFrame {
 
@@ -38,6 +41,9 @@ public class FrmManteProd extends JFrame {
 	private JTextField txtStock;
 	private JTextField txtPrecio;
 
+	DefaultTableModel modelo = new DefaultTableModel();
+	private JTable tblSalida;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -60,19 +66,19 @@ public class FrmManteProd extends JFrame {
 	public FrmManteProd() {
 		setTitle("Mantenimiento de Productos");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 390);
+		setBounds(100, 100, 450, 550);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		contentPane.setLayout(null);
 
 		JButton btnRegistrar = new JButton("Registrar");
+		btnRegistrar.setBounds(324, 29, 89, 23);
 		btnRegistrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				registrar();
 			}
 		});
-		btnRegistrar.setBounds(324, 29, 89, 23);
+		contentPane.setLayout(null);
 		contentPane.add(btnRegistrar);
 
 		JScrollPane scrollPane = new JScrollPane();
@@ -83,12 +89,12 @@ public class FrmManteProd extends JFrame {
 		scrollPane.setViewportView(txtSalida);
 
 		JButton btnListado = new JButton("Listado");
+		btnListado.setBounds(177, 322, 89, 23);
 		btnListado.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				listado();
 			}
 		});
-		btnListado.setBounds(177, 322, 89, 23);
 		contentPane.add(btnListado);
 
 		txtCodigo = new JTextField();
@@ -113,8 +119,8 @@ public class FrmManteProd extends JFrame {
 		contentPane.add(lblNomProducto);
 
 		txtDescripcion = new JTextField();
-		txtDescripcion.setColumns(10);
 		txtDescripcion.setBounds(122, 42, 144, 20);
+		txtDescripcion.setColumns(10);
 		contentPane.add(txtDescripcion);
 
 		JLabel lblStock = new JLabel("Stock:");
@@ -122,8 +128,8 @@ public class FrmManteProd extends JFrame {
 		contentPane.add(lblStock);
 
 		txtStock = new JTextField();
-		txtStock.setColumns(10);
 		txtStock.setBounds(122, 103, 77, 20);
+		txtStock.setColumns(10);
 		contentPane.add(txtStock);
 
 		JLabel lblPrecio = new JLabel("Precio:");
@@ -131,8 +137,8 @@ public class FrmManteProd extends JFrame {
 		contentPane.add(lblPrecio);
 
 		txtPrecio = new JTextField();
-		txtPrecio.setColumns(10);
 		txtPrecio.setBounds(122, 131, 77, 20);
+		txtPrecio.setColumns(10);
 		contentPane.add(txtPrecio);
 
 		JLabel lblProveedores = new JLabel("Proveedor:");
@@ -144,13 +150,25 @@ public class FrmManteProd extends JFrame {
 		contentPane.add(cboProveedores);
 
 		JButton btnBuscar = new JButton("Buscar");
+		btnBuscar.setBounds(324, 63, 89, 23);
 		btnBuscar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				buscar();
 			}
 		});
-		btnBuscar.setBounds(324, 63, 89, 23);
 		contentPane.add(btnBuscar);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(10, 355, 414, 148);
+		contentPane.add(scrollPane_1);
+		
+		tblSalida = new JTable();
+		scrollPane_1.setViewportView(tblSalida);
+		tblSalida.setModel(modelo);
+		modelo.addColumn("Codigo");
+		modelo.addColumn("Nombre");
+		modelo.addColumn("Categoria");
+		modelo.addColumn("Proveedor");
 
 		llenaCombo();
 	}
@@ -236,11 +254,17 @@ public class FrmManteProd extends JFrame {
 		List<Producto> lstProductos = em.createQuery("select p from Producto p", Producto.class).getResultList();
 		//mostrar el listado en el txtArea
 		for(Producto p : lstProductos) {
+			//muestra en el txtArea
 			imprimir("IdProducto...:" + p.getId_prod());
 			imprimir("Nombre...:" + p.getDes_prod());
 			imprimir("Categoria...:" + p.getIdcategoria() + "-" + p.getCategoria().getDescripcion());
 			imprimir("Proveedor...:" + p.getIdprovedor() + "-" + p.getProveedor().getNombre_rs());
 			imprimir("-----------------------------");
+			//muestra en la tabla
+			Object datos[] = {p.getId_prod(), p.getDes_prod(), 
+					p.getIdcategoria() + "-" + p.getCategoria().getDescripcion(), 
+					p.getIdprovedor() + "-" + p.getProveedor().getNombre_rs()};
+			modelo.addRow(datos);
 		}
 		//cerrar
 		em.close();
